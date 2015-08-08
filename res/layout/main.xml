@@ -28,5 +28,6 @@
             android:id="@+id/query_data"
             android:text="Query data"
             />
+
 </LinearLayout>
 

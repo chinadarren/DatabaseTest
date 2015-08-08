@@ -1,9 +1,10 @@
 package com.example.DatabaseTest;
-
 import android.app.Activity;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -12,13 +13,13 @@ public class MyActivity extends Activity {
      * Called when the activity is first created.
      */
     private MyDatabaseHelper dbHelper;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         dbHelper = new MyDatabaseHelper(this, "BookStore.db", null, 3);
-       Button deleteButton = (Button) findViewById(R.id.delete_data);
+        Button queryButton = (Button) findViewById(R.id.query_data);
+        Button deleteButton = (Button) findViewById(R.id.delete_data);
         Button createDatabase = (Button) findViewById(R.id.create_database);
         Button updataData = (Button) findViewById(R.id.update_data);
         createDatabase.setOnClickListener(new View.OnClickListener() {
@@ -55,8 +56,8 @@ public class MyActivity extends Activity {
             public void onClick(View v) {
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
                 ContentValues values = new ContentValues();
-                values.put("price",10.99);
-                db.update("Book",values,"name = ?",new String []{
+                values.put("price", 10.99);
+                db.update("Book", values, "name = ?", new String[]{
                         "The Da Vinci Code "
                 });
             }
@@ -65,7 +66,30 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View v) {
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
-                db.delete("Book","pages > ?",new String[]{"500"});
+                db.delete("Book", "pages > ?", new String[]{"500"});
+            }
+        });
+        queryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                //查询Book表中的所有数据
+                Cursor cursor = db.query("Book",null,null,null,null,null,null);
+                //将数据的指针移动到第一行的问题
+                if(cursor.moveToFirst()){
+                   do{
+                       //遍历Cursor对象，取出数据并打印
+                       String name = cursor.getString(cursor.getColumnIndex("name"));
+                       String author = cursor.getString(cursor.getColumnIndex("author"));
+                       int pages = cursor.getInt(cursor.getColumnIndex("pages"));
+                       double price = cursor.getDouble(cursor.getColumnIndex("price"));
+                       Log.d("MainActivity","book name is " + name );
+                       Log.d("MainActivity","book pages is " + pages);
+                       Log.d("MainActivity","book price is " + price);
+                       Log.d("MainActivity","book author is "+ author);
+                   }while (cursor.moveToNext());
+                }
+                cursor.close();
             }
         });
     }
