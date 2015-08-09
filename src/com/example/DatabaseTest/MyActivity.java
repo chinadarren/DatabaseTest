@@ -18,6 +18,7 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         dbHelper = new MyDatabaseHelper(this, "BookStore.db", null, 3);
+        Button replaceData = (Button) findViewById(R.id.replace_data);
         Button queryButton = (Button) findViewById(R.id.query_data);
         Button deleteButton = (Button) findViewById(R.id.delete_data);
         Button createDatabase = (Button) findViewById(R.id.create_database);
@@ -90,6 +91,31 @@ public class MyActivity extends Activity {
                    }while (cursor.moveToNext());
                 }
                 cursor.close();
+            }
+        });
+        replaceData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                db.beginTransaction();//开启事务处理
+                try{
+                    db.delete("Book",null,null);
+//                    if(true){
+//                        //这里手动抛出一个异常，让事务失败
+//                        throw new NullPointerException();
+//                    }
+                    ContentValues values = new ContentValues();
+                    values.put("name","Game of Thrones");
+                    values.put("author","George Martion");
+                    values.put("pages",720);
+                    values.put("price",20.85);
+                    db.insert("Book", null, values);
+                    db.setTransactionSuccessful();//事务已经执行成功
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+                    db.endTransaction();//结束事务
+                }
             }
         });
     }
